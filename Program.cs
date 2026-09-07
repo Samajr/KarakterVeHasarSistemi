@@ -4,10 +4,98 @@ using MySql.Data.MySqlClient;
 
 public class Program()
 {
-
-    static void main()
+   
+    static void Main()
     {
         
+         string baglanti = "Server=localhost;Database=karakterhasarDb;Uid=root;Pwd='';";
+        Karakter kahraman = null;
+        while (true)
+        {
+            using (MySqlConnection baglan = new MySqlConnection(baglanti))
+        {
+            baglan.Open();
+            string kliste = "select * from karakterler";
+            using (MySqlCommand klistele= new MySqlCommand(kliste,baglan))
+            {
+                using (MySqlDataReader drliste =klistele.ExecuteReader())
+                {
+
+                    while (drliste.Read())
+                    {
+                        int id = Convert.ToInt16(drliste["id"]);
+                        string isim = drliste["isim"].ToString();
+                        string tur = drliste["tur"].ToString();
+                        Console.WriteLine($"{id}- {isim}: {tur}");
+                    }
+                }
+                    
+            }
+        }
+        Console.Write("Savaşmak istediğiniz karakterin numarasını girin: ");
+        int secilenID = Convert.ToInt16(Console.ReadLine());
+        
+        using (MySqlConnection baglan = new MySqlConnection(baglanti))
+            {
+                baglan.Open();
+                string seckarakter = "select * from karakterler where id=" +secilenID;
+                using (MySqlCommand kmt = new MySqlCommand(seckarakter, baglan))
+                {
+                    using (MySqlDataReader kdr= kmt.ExecuteReader())
+                    {
+     
+                        if (kdr.Read())
+                        {
+                            string tur = kdr["tur"].ToString();
+                            if (tur == "Savasci")
+                            {
+                                kahraman = new Savasci();
+                                kahraman.Id = Convert.ToInt16(kdr["id"]);
+                                kahraman.Isim = kdr["isim"].ToString();
+                                kahraman.Seviye = Convert.ToInt16(kdr["Seviye"]);
+                                kahraman.Can = Convert.ToInt16(kdr["Can"]);
+                                ((Savasci)kahraman).Ofke = Convert.ToInt32(kdr["enerji_kaynagi"]);
+                                Console.WriteLine($"Savaş başlıyor! Seçilen kahraman: {kahraman.Isim}");
+                                break;
+                            }
+                            else if (tur == "Buyucu")
+                            {
+                                kahraman = new Buyucu();
+                                kahraman.Id = Convert.ToInt16(kdr["id"]);
+                                kahraman.Isim = kdr["isim"].ToString();
+                                kahraman.Seviye = Convert.ToInt16(kdr["Seviye"]);
+                                kahraman.Can = Convert.ToInt16(kdr["Can"]);
+                                ((Buyucu)kahraman).Mana = Convert.ToInt32(kdr["enerji_kaynagi"]);
+                                Console.WriteLine($"Savaş başlıyor! Seçilen kahraman: {kahraman.Isim}");
+                                break;
+                            }
+                            else { Console.WriteLine("geçersiz karakter lütfen doğru tuşlayınız..");
+                                Console.ReadLine();
+                            }
+                               
+                        }
+                        else
+                        {
+                            Console.WriteLine("Girilen ID bulunamadı! Devam etmek için Enter'a basın...");
+                            Console.ReadLine();
+                        }
+
+
+
+
+                    }
+                }
+            }
+            if (kahraman != null)
+            {
+                break;
+            }
+        }
+        Console.Clear();
+        Console.WriteLine($"Savaş başlıyor! Seçilen kahraman: {kahraman.Isim}");
+
+        Console.WriteLine("\nDevam etmek için Enter'a basın...");
+        Console.ReadLine();
     }
 }
 public class Karakter
