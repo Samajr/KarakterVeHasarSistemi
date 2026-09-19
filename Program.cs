@@ -91,11 +91,55 @@ public class Program()
                 break;
             }
         }
+        Boss canavar = null;
         Console.Clear();
         Console.WriteLine($"Savaş başlıyor! Seçilen kahraman: {kahraman.Isim}");
 
         Console.WriteLine("\nDevam etmek için Enter'a basın...");
         Console.ReadLine();
+        while (true)
+        {
+            string bossliste = "select * from bosslar";
+            using (MySqlConnection bag = new MySqlConnection(baglanti))
+            {
+                using (MySqlCommand kmt = new MySqlCommand(bossliste, bag))
+                {
+                    bag.Open();
+                    using (MySqlDataReader drliste = kmt.ExecuteReader())
+                    {
+                        Console.WriteLine("Savaşmak istediğiniz boss numarasını giriniz..");
+                        while (drliste.Read())
+                        {
+                            Console.WriteLine($"{drliste["id"]} {drliste["isim"]} {drliste["can"]} {drliste["max_Hasar"]}  ");
+                        }
+                        string secilenbossid;
+                        secilenbossid = Console.ReadLine();
+                        string bossec = "select * from bosslar where id=" + secilenbossid;
+                        using (MySqlCommand rkp = new MySqlCommand(bossec))
+                        {
+                            using (MySqlDataReader boskmt = rkp.ExecuteReader())
+                            {
+                                if (boskmt.Read())
+                                {
+
+                                    canavar = new Boss();
+                                    canavar.Id = Convert.ToInt16(boskmt["id"]);
+                                    canavar.Isim = Convert.ToString(boskmt["isim"]);
+                                    canavar.Can = Convert.ToInt16(boskmt["can"]);
+                                    canavar.Maxhasar = Convert.ToInt16(boskmt["max_hasar"]);
+                                }
+                            }
+                        }
+
+
+                    }
+                }
+            }
+            if (canavar != null)
+            {
+                break; 
+            }
+        }
     }
 }
 public class Karakter
